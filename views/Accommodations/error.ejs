@@ -1,7 +1,35 @@
 <% layout("layouts/boilerplate") %>
+    <style>
+        .card .card-header {
+            background-color: #fff;
+            border-bottom: none;
+        }
+        .btn {
+            background-color: #fe424d;;
+        }
+    </style>
+    <!-- <div class="row mt-3">
+        <div class="alert alert-danger col-6 offset-3" role="alert">
+            <p class="alert-heading">
+            </p>
+        </div>
+    </div> -->
 
-<div class="row mt-3">
-    <div class="alert alert-danger col-6 offset-3" role="alert">
-        <p class="alert-heading"> <%= message %></p>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-12">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <h3 class="card-header display-1 text-muted text-center">
+                        <%= statusCode %>
+                    </h3>
+                    <div class="card-body text-center">
+                        <span class="card-subtitle mb-2 text-muted">
+                            <%= message %>
+                        </span>
+                        <p class="mt-4 mb-4">The page you're looking for doesn't exist or has been moved.</p>
+                        <a href="/" class="btn text-white btn-sm mb-3">Back To Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
