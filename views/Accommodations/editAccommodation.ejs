@@ -7,7 +7,7 @@
 
                 <div class="mb-3 mt-3">
                     <label for="title" class="form-label">Title</label>
-                    <input name="title" value="<%= accommodation.title %>" type="text" class="form-control" id="title"
+                    <input name="accommodation[title]" value="<%= accommodation.title %>" type="text" class="form-control" id="title"
                         required>
                     <div class="valid-feedback">
                         Title looks good!
@@ -19,7 +19,7 @@
 
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea name="description" class="form-control" id="description"
+                    <textarea name="accommodation[description]" class="form-control" id="description"
                         required><%= accommodation.description %></textarea>
                     <div class="valid-feedback">
                         Description looks good!
@@ -36,13 +36,13 @@
 
                 <div class="mb-3">
                     <label for="image" class="form-label">New Image</label>
-                    <input name="image" type="file" class="form-control" id="image">
+                    <input name="accommodation[image]" type="file" class="form-control" id="image">
                 </div>
 
                 <div class="row">
                     <div class="mb-3 col-md-4">
                         <label for="price" class="form-label">Price</label>
-                        <input name="price" value="<%= accommodation.price %>" type="number" class="form-control"
+                        <input name="accommodation[price]" value="<%= accommodation.price %>" type="number" class="form-control"
                             id="price" required>
                         <div class="valid-feedback">
                             Price looks reasonable!
@@ -54,7 +54,7 @@
 
                     <div class="mb-3 col-md-8">
                         <label for="location" class="form-label">Location</label>
-                        <input name="location" value="<%= accommodation.location %>" type="text" class="form-control"
+                        <input name="accommodation[location]" value="<%= accommodation.location %>" type="text" class="form-control"
                             id="location" required>
                         <div class="valid-feedback">
                             Location looks beautiful!
@@ -67,7 +67,7 @@
 
                 <div class="mb-3">
                     <label for="country" class="form-label">Country</label>
-                    <input name="country" value="<%= accommodation.country %>" type="text" class="form-control"
+                    <input name="accommodation[country]" value="<%= accommodation.country %>" type="text" class="form-control"
                         id="country" required>
                     <div class="valid-feedback">
                         Country looks marvelous!

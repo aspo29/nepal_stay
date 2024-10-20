@@ -38,13 +38,12 @@
             </div>   
             <div class="navbar-nav ms-auto">
             <a class="nav-link" href="/accommodations/create">NepalStay your home</a>
-                
-                <a class="nav-link" href="/signup"><b>Sign-up</b></a>
-                <a class="nav-link" href="/login"><b>Log In</b></a>
-               
-            
-                <a class="nav-link" href="/logout"><b>Log Out</b></a>
-               
+                <%if(!currUser) {%>
+                <a class="nav-link" href="/signup"><b>sign up</b></a>
+                <a class="nav-link" href="/login"><b>login</b></a>
+                <%}%> <%if(currUser) {%>
+                <a class="nav-link" href="/logout"><b>log out</b></a>
+                <%}%>
             </div>
         </div>
     </div>
