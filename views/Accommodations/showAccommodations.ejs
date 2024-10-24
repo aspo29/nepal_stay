@@ -1,14 +1,21 @@
 <% layout("layouts/boilerplate") %>
+  <script>
+    const mapKey = '<%=process.env.MAP_KEY%>';
+    const coordinates = '<%- JSON.stringify(accommodation.geometry.coordinates) %>';
+    const title = '<%- JSON.stringify(accommodation.title) %>';
+  </script>
   <div class="row mt-3">
     <div class="col-8 offset-3">
       <h3>
         <%= accommodation.title %>:
       </h3>
       <div class="card col-6 show-card accommodation-card" style="width: 40rem;">
-        <img src="<%= accommodation.image %>" class="card-img-top show-img" alt="Accommodation Image">
+        <img src="<%= accommodation.image.url %>" class="card-img-top show-img" alt="Accommodation Image">
         <div class="card-body">
           <p class="card-text">
-          <p class="card-text">Owned By <i><%=accommodation.owner.username%> </i></p>
+          <p class="card-text">Owned By <i>
+              <%=accommodation.owner.username%>
+            </i></p>
           <ul class="list-unstyled">
             <li>
               <%= accommodation.description %>
@@ -25,14 +32,14 @@
           </ul>
           </p>
           <% if(currUser && currUser._id.equals(accommodation.owner._id)) { %>
-          <div class="btns">
-            <a href="/accommodations/edit/<%= accommodation._id %>" class="btn edit-btn">Edit</a>
-            <form action="/accommodations/<%= accommodation._id %>?_method=DELETE" method="post"
-              style="display:inline;">
-              <button class="btn btn-dark offset-3">Delete</button>
-            </form>
-          </div>
-          <%}%>
+            <div class="btns">
+              <a href="/accommodations/edit/<%= accommodation._id %>" class="btn edit-btn">Edit</a>
+              <form action="/accommodations/<%= accommodation._id %>?_method=DELETE" method="post"
+                style="display:inline;">
+                <button class="btn btn-dark offset-3">Delete</button>
+              </form>
+            </div>
+            <%}%>
         </div>
       </div>
       <a href="/accommodations" class="btn btn-secondary">Back to List</a>
@@ -40,92 +47,148 @@
 
     <div class="col-8 offset-3 mb-3">
       <% if(currUser) { %>
-      <hr />
-      <h4>Leave a Review</h4>
-      <form action="/accommodations/<%= accommodation._id %>/reviews" method="POST" novalidate class="needs-validation">
-        <div class="mb-3 mt-3">
-          <label for="rating" class="form-label">Rating</label>
-          <fieldset class="starability-slot">
-            <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked
-              aria-label="No rating." />
-            <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-            <label for="first-rate1" title="Terrible">1 star</label>
-            <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-            <label for="first-rate2" title="Not good">2 stars</label>
-            <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-            <label for="first-rate3" title="Average">3 stars</label>
-            <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-            <label for="first-rate4" title="Very good">4 stars</label>
-            <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-            <label for="first-rate5" title="Amazing">5 stars</label>
-          </fieldset>
-        </div>
-        <div class="mb-3 mt-3">
-          <label for="comment" class="form-label">Comments</label>
-          <textarea name="review[comment]" cols="30" rows="5" id="comment" class="form-control" required></textarea>
-          <div class="invalid-feedback">Please add some comments for the review</div>
-        </div>
-        <button class="btn btn-outline-dark">Submit</button>
-      </form>
-      <%}%>
-      <hr />
-       <%if(accommodation.reviews.length > 0) {%>
+        <hr />
+        <h4>Leave a Review</h4>
+        <form action="/accommodations/<%= accommodation._id %>/reviews" method="POST" novalidate
+          class="needs-validation">
+          <div class="mb-3 mt-3">
+            <label for="rating" class="form-label">Rating</label>
+            <fieldset class="starability-slot">
+              <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked
+                aria-label="No rating." />
+              <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+              <label for="first-rate1" title="Terrible">1 star</label>
+              <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+              <label for="first-rate2" title="Not good">2 stars</label>
+              <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+              <label for="first-rate3" title="Average">3 stars</label>
+              <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+              <label for="first-rate4" title="Very good">4 stars</label>
+              <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+              <label for="first-rate5" title="Amazing">5 stars</label>
+            </fieldset>
+          </div>
+          <div class="mb-3 mt-3">
+            <label for="comment" class="form-label">Comments</label>
+            <textarea name="review[comment]" cols="30" rows="5" id="comment" class="form-control" required></textarea>
+            <div class="invalid-feedback">Please add some comments for the review</div>
+          </div>
+          <button class="btn btn-outline-dark">Submit</button>
+        </form>
+        <%}%>
+          <hr />
+          <%if(accommodation.reviews.length> 0) {%>
 
-      <!-- Displaying reviews -->
-      <div class="row">
-        <p><b>All Reviews</b></p>
+            <!-- Displaying reviews -->
+            <div class="row">
+              <p><b>All Reviews</b></p>
 
-        <!-- Loop through the reviews -->
-        <% accommodation.reviews.forEach(review=> { %>
+              <!-- Loop through the reviews -->
+              <% accommodation.reviews.forEach(review=> { %>
 
-          <div class="card h-100 col-12 col-md-6 col-lg-4 ms-3 mb-4 ">
-            <div class="card-body">
-              <!-- <h5 class="card-body">@<%=review.author.username%></h5> -->
-              <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
-              <p class="card-text">
-                <%= review.comment %>
-              </p>
+                <div class="card h-100 col-12 col-md-6 col-lg-4 ms-3 mb-4 ">
+                  <div class="card-body">
+                    <!-- <h5 class="card-body">@<%=review.author.username%></h5> -->
+                    <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
+                    <p class="card-text">
+                      <%= review.comment %>
+                    </p>
 
-              <% if(currUser && currUser._id.equals(review.author._id)) { %>
-              <!-- Delete form for the review -->
-              <button type="button" class="btn btn-dark btn-sm mb-3" data-bs-toggle="modal"
-                data-bs-target="#deleteModal-<%= review._id %>">
-                Delete
-              </button>
-              <% } %>
-              <!-- Bootstrap Modal -->
-              <div class="modal fade" id="deleteModal-<%= review._id %>" tabindex="-1"
-                aria-labelledby="deleteModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      Are you sure you want to delete this review?
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <% if(currUser && currUser._id.equals(review.author._id)) { %>
+                      <!-- Delete form for the review -->
+                      <button type="button" class="btn btn-dark btn-sm mb-3" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal-<%= review._id %>">
+                        Delete
+                      </button>
+                      <% } %>
+                        <!-- Bootstrap Modal -->
+                        <div class="modal fade" id="deleteModal-<%= review._id %>" tabindex="-1"
+                          aria-labelledby="deleteModalLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                  aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                Are you sure you want to delete this review?
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 
-                      <!-- Actual delete form -->
-                      <form method="POST"
-                        action="/accommodations/<%= accommodation._id %>/reviews/<%= review._id %>?_method=DELETE">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                      </form>
-                    </div>
+                                <!-- Actual delete form -->
+                                <form method="POST"
+                                  action="/accommodations/<%= accommodation._id %>/reviews/<%= review._id %>?_method=DELETE">
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                   </div>
                 </div>
-              </div>
+                <% }) %>
             </div>
-          </div>
-          <% }) %>
-      </div>
-      <%}%>
+            <%}%>
     </div>
 
     <div class="col-6 offset-3 mb-3">
       <h3>Where you'll be</h3>
-      <div id="map"></div>
+      <div id="map">
+        <select name="mapstyles" id="mapstyles" class="form-select mapstyles-select">
+          <optgroup label="Navigation and city exploration">
+            <option value="STREETS">STREETS</option>
+            <option value="STREETS.DARK">STREETS.DARK</option>
+            <option value="STREETS.LIGHT">STREETS.LIGHT</option>
+            <option value="STREETS.PASTEL">STREETS.PASTEL</option>
+          </optgroup>
+          <option value="OUTDOOR">OUTDOOR</option>
+          <option value="WINTER">WINTER</option>
+          <option value="SATELLITE">SATELLITE</option>
+          <option value="HYBRID" selected>HYBRID</option>
+          <optgroup label="Data visualization">
+            <option value="DATAVIZ">DATAVIZ</option>
+            <option value="DATAVIZ.DARK">DATAVIZ.DARK</option>
+            <option value="DATAVIZ.LIGHT">DATAVIZ.LIGHT</option>
+          </optgroup>
+          <optgroup label="Minimalist and general purpose">
+            <option value="BASIC">BASIC</option>
+            <option value="BASIC.DARK">BASIC.DARK</option>
+            <option value="BASIC.LIGHT">BASIC.LIGHT</option>
+          </optgroup>
+          <optgroup label="High contrast navigation">
+            <option value="BRIGHT">BRIGHT</option>
+            <option value="BRIGHT.DARK">BRIGHT.DARK</option>
+            <option value="BRIGHT.LIGHT">BRIGHT.LIGHT</option>
+            <option value="BRIGHT.PASTEL">BRIGHT.PASTEL</option>
+          </optgroup>
+          <optgroup label="Topographic study">
+            <option value="TOPO">TOPO</option>
+            <option value="TOPO.SHINY">TOPO.SHINY</option>
+            <option value="TOPO.PASTEL">TOPO.PASTEL</option>
+            <option value="TOPO.TOPOGRAPHIQUE">TOPO.TOPOGRAPHIQUE</option>
+          </optgroup>
+          <optgroup label="Minimalist">
+            <option value="VOYAGER">VOYAGER</option>
+            <option value="VOYAGER.DARK">VOYAGER.DARK</option>
+            <option value="VOYAGER.LIGHT">VOYAGER.LIGHT</option>
+            <option value="VOYAGER.VINTAGE">VOYAGER.VINTAGE</option>
+          </optgroup>
+          <optgroup label="High contrast">
+            <option value="TONER">TONER</option>
+            <option value="TONER.BACKGROUND">TONER.BACKGROUND</option>
+            <option value="TONER.LITE">TONER.LITE</option>
+            <option value="TONER.LINES">TONER.LINES</option>
+          </optgroup>
+          <optgroup label="Neutral greyscale style with hillshading">
+            <option value="BACKDROP">BACKDROP</option>
+            <option value="BACKDROP.DARK">BACKDROP.DARK</option>
+            <option value="BACKDROP.LIGHT">BACKDROP.LIGHT</option>
+          </optgroup>
+          <option value="OPENSTREETMAP">OPENSTREETMAP</option>
+        </select>
+      </div>
     </div>
   </div>
+  <script src="/js/map.js"></script>

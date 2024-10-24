@@ -104,7 +104,7 @@
         <% data.forEach(accommodation=> { %>
             <a href="/accommodations/<%= accommodation.id %>" class="accommodation-link">
                 <div class="card col accommodation-card">
-                    <img src="<%= accommodation.image %>" class="card-img-top" alt="accommodation-image"
+                    <img src="<%= accommodation.image.url %>" class="card-img-top" alt="accommodation-image"
                         style="height: 20rem;">
                     <div class="card-img-overlay"></div>
                     <div class="card-body">
@@ -119,3 +119,21 @@
             </a>
             <% }); %>
     </div>
+
+    <script>
+        let taxSwitch = document.getElementById("flexSwitchCheckDefault")
+        taxSwitch.addEventListener("click", () => {
+            let taxinfo = document.getElementsByClassName("tax-info");
+            for (info of taxinfo) {
+                if (info.style.display != "inline") {
+                    info.style.display = "inline";
+                }
+                else {
+                    info.style.display = "none"
+                }
+
+            }
+
+        })
+
+    </script>

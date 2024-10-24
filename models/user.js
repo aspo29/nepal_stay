@@ -8,6 +8,16 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true // Ensure unique usernames
+  },
+  // chats: [{
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "Chat",
+  //   require: true,
+  // }]
 });
 
 userSchema.plugin(passportLocalMongoose);

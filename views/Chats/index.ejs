@@ -1,0 +1,196 @@
+<% layout('/layouts/boilerplate.ejs') %>
+    <style>
+        .sender-message {
+            text-align: right;
+            background-color: #28a745;
+            color: white;
+            margin-left: auto;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 40%;
+        }
+
+        .receiver-message {
+            text-align: left;
+            background-color: #17a2b8;
+            color: white;
+            margin-right: auto;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 40%;
+        }
+
+        .chat-box {
+            margin-bottom: 20px;
+        }
+
+        .bg-light {
+            padding: 20px;
+        }
+    </style>
+    </head>
+
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Left side for chat list -->
+                <div class="col-md-3 mt-2 overflow-auto" style="max-height: 90vh;">
+                    <h2 class="text-center mb-4">All Chats</h2>
+                    <ul class="list-unstyled" id="chatList">
+                        <!-- Inside your chat rendering loop -->
+                        <% chats.forEach(function(chat) { %>
+                            <li class="mb-3 p-3 bg-light shadow-sm rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="font-weight-bold m-0">
+                                        <%= chat.otherUser %>
+                                    </p>
+                                    <button class="btn btn-success btn-sm"
+                                        onclick="openChat('<%= chat._id %>', '<%= chat.otherUserId %>')">
+                                        Open Chat
+                                    </button>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    <%= chat.lastMessage %>
+                                </p>
+                            </li>
+                            <% }); %>
+                    </ul>
+                </div>
+
+                <!-- Right side for chat interaction -->
+                <div class="col-md-9 p-4 bg-white">
+                    <% chats.forEach(function(chat) { %>
+                        <div id="chat-<%= chat._id %>" class="chat-box d-none">
+                            <h3 class="mb-4">Chat with <%= chat.otherUser %>
+                            </h3>
+                            <div class="bg-light p-4 rounded mb-4" style="max-height: 70vh; overflow-y: auto;">
+                                <% chat.messages.forEach(function(message) { %>
+                                    <p
+                                        class="<%= message.sender === currentUser.username ? 'sender-message' : 'receiver-message' %>">
+                                        <strong>
+                                            <%= message.sender===currentUser.username ? 'You' : chat.otherUser %>:
+                                        </strong>
+                                        <%= message.text %>
+                                    </p>
+                                    <% }); %>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Type your message..."
+                                    id="input-<%= chat._id %>">
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="button"
+                                        onclick="sendMessage('<%= chat._id %>', '<%= chat.otherUserId %>')">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                            <div id="no-chat-selected" class="chat-box">
+                                <h3>Select a chat to start messaging</h3>
+                            </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const socket = io();
+
+            // Define user variables from EJS
+            const currentUserId = "<%= currentUser._id %>";
+            const currentUsername = "<%= currentUser.username %>";
+
+            // Join the chat rooms when the user connects
+            socket.on('connect', () => {
+                console.log('Connected to the Socket.IO server');
+
+                // Join the room for each chat the user is part of
+                // <% chats.forEach(function (chat) { %>
+                //         socket.emit('joinRoom', '<%= chat._id %>');
+                // <% }); %>
+            });
+
+            // Listen for incoming messages
+            socket.on('chat message', (data) => {
+                const chatBox = document.getElementById('chat-' + data.chatId);
+
+                if (chatBox) {
+                    const messageElement = document.createElement('p');
+                    messageElement.classList.add('p-2', 'rounded', 'mb-2');
+
+                    if (data.senderId === currentUserId) {
+                        // Current user sent this message
+                        messageElement.classList.add('bg-success', 'sender-message');
+                        messageElement.innerHTML = `<strong>You:</strong> ${data.msg}`;
+                    } else {
+                        // Another user sent this message
+                        messageElement.classList.add('bg-info', 'receiver-message');
+                        messageElement.innerHTML = `<strong>${data.username}:</strong> ${data.msg}`;
+                    }
+
+                    chatBox.querySelector('.bg-light').appendChild(messageElement);
+                }
+            });
+
+            // Send a message to the server and emit via socket.io
+            async function sendMessage(chatId, otherUserId) {
+                const input = document.getElementById(`input-${chatId}`);
+                const messageText = input.value.trim();
+
+                if (messageText === "") {
+                    alert("Message cannot be empty");
+                    return;
+                }
+
+                try {
+                    // Send the message to the server using fetch (for persistence in the DB)
+                    const response = await fetch(`/chats/${chatId}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: messageText,
+                            sender: currentUserId, // Include the sender ID
+                            receiver: otherUserId // Pass the receiver ID from the function parameter
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to send message');
+                    }
+
+                    // Clear the input field after sending the message
+                    input.value = '';
+
+                    // Emit the message to the server via Socket.IO (for real-time communication)
+                    socket.emit('chat message', {
+                        chatId,
+                        msg: messageText,
+                        username: currentUsername,
+                        senderId: currentUserId
+                    });
+
+                    console.log("Message sent successfully in chat:", chatId, "Message:", messageText);
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    alert('Error sending message. Please try again.');
+                }
+            }
+
+            // Open a specific chat by hiding others
+            function openChat(chatId, otherUserId) {
+                // Hide all chat boxes
+                const chatBoxes = document.querySelectorAll('.chat-box');
+                chatBoxes.forEach(box => box.classList.add('d-none'));
+
+                // Show the selected chat
+                const selectedChatBox = document.getElementById('chat-' + chatId);
+                if (selectedChatBox) {
+                    selectedChatBox.classList.remove('d-none');
+                }
+
+                // Ensure you pass the other user ID when calling sendMessage
+                const sendButton = selectedChatBox.querySelector('.btn-success');
+                sendButton.onclick = () => sendMessage(chatId, otherUserId);
+            }
+        </script>
+    </body>

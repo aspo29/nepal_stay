@@ -18,6 +18,10 @@ module.exports.saveRedirectUrl = (req, res, next) => {
     }
     next()
 }
+module.exports.saveOriginalUrl = (req, res, next) => {
+    req.session.redirectUrl = req.originalUrl
+    next();
+}
 
 module.exports.isOwner = async(req, res, next) => {
     let {id} = req.params;

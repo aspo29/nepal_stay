@@ -3,8 +3,11 @@ const { accommodationSchema } = require('../schema');
 const Accommodation = require('../models/accommodations');
 const ExpressError = require('../utils/ExpressError.js');
 const wrapAsync = require("../utils/wrapAsync.js");
-const upload = require('../utils/multerConfig');
-
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const { config, geocoding } = require('@maptiler/client');
+// Configure MapTiler API key and fetch
+config.apiKey = process.env.MAP_KEY;
+config.fetch = fetch;
 // Create a new accommodation, wrapped with wrapAsync
 exports.createAccommodation = wrapAsync(async (req, res) => {
     // const { error } = accommodationSchema.validate(req.body);
@@ -12,8 +15,15 @@ exports.createAccommodation = wrapAsync(async (req, res) => {
     //     const message = error.details.map(el => el.message).join(', ');
     //     throw new ExpressError(400, message);
     // }
+    const response = await geocoding.forward(req.body.accommodation.location);
+    // Get the first feature's geometry (latitude, longitude)
+    const geometry = response.features[0].geometry;
+    let url = req.file.path;
+    let filename = req.file.filename;
     const newAccommodation = new Accommodation(req.body.accommodation);
     newAccommodation.owner = req.user._id;
+    newAccommodation.image = { url, filename };
+    newAccommodation.geometry = geometry;
     await newAccommodation.save();
     req.flash('success', 'New accommodation created successfully!');
     res.redirect('/accommodations/');
@@ -56,7 +66,10 @@ exports.editAccommodationById = async (req, res) => {
             req.flash("error", "accommdation you requested for does not exist")
             return res.redirect("/accommodations");
         }
-        res.render('Accommodations/editAccommodation', { accommodation });
+        let originalUrl = accommodation.image.url;
+        const transformation = 'h_300,w_250'; // Specify your transformations here
+        const cloudinaryUrl = originalUrl.replace(/(https:\/\/res\.cloudinary\.com\/)(.+?)(\/image\/upload)(\/v\d+\/)/, `$1${process.env.CLOUD_NAME}$3/${transformation}$4`);
+        res.render('Accommodations/editAccommodation', { accommodation, newAccommodationImageUrl: cloudinaryUrl });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching accommodation", error });
     }
@@ -76,7 +89,9 @@ exports.updateAccommodation = wrapAsync(async (req, res) => {
 
         // If a new image is uploaded, update the image field
         if (req.file) {
-            accommodation.image = `/uploads/${req.file.filename}`; // Use multer's file path
+            let url = req.file.path;
+            let filename = req.file.filename;
+            accommodation.image = { url, filename }; // Update the image field with new image info
         }
 
         // Save the updated accommodation
